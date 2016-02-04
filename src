@@ -1,0 +1,31 @@
+var http = require('http');
+var bb = require('bonescript');
+var lumen = undefined;
+
+var server = http.createServer(function (request, response) {
+	response.writeHead(200, {"Content-Type": "application/json"});
+	var tmp = bb.readTextFile('/sys/class/hwmon/hwmon0/device/temp1_input');
+
+	
+	bb.analogRead('P9_40', printAIN1);
+
+	function printAIN1(x) {
+		console.log(x);
+		lumen = x.value < 1 ? Math.round(255 * x.value) : 0;
+
+	}      
+
+	var temp = 
+	{
+		"id": "1",
+		"luminosity": lumen,
+		"temp": (tmp / 1000) - 37,
+		"scale": "C"
+	};
+	response.end(JSON.stringify(temp));
+
+});
+
+server.listen(8080);
+
+console.log("Servidor Rodando na porta 8080");
